@@ -23,6 +23,7 @@ node_modules/
 .idea/
 .vscode/
 .playwright-cli/
+.wrangler/
 *.log
 
 # Secrets and local overrides

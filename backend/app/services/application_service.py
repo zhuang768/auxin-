@@ -19,6 +19,50 @@ def list_applications(status: Optional[str] = None) -> list[dict]:
         return [dict(row) for row in conn.execute(sql, params).fetchall()]
 
 
+def list_admin_applications(status: Optional[str] = None, query: str = "") -> list[dict]:
+    """List submitted cases only; LINE conversation drafts are not applications."""
+    sql = """
+        SELECT applications.*, users.display_name
+        FROM applications
+        JOIN users ON users.id = applications.user_id
+        WHERE applications.status != 'draft'
+    """
+    params: list[str] = []
+    if status:
+        sql += " AND applications.status = ?"
+        params.append(status)
+    if query:
+        sql += """
+            AND (
+                instr(lower(applications.id), lower(?)) > 0
+                OR instr(lower(applications.tool_name), lower(?)) > 0
+                OR instr(lower(users.display_name), lower(?)) > 0
+            )
+        """
+        params.extend((query, query, query))
+    sql += """
+        ORDER BY CASE applications.status
+            WHEN 'submitted' THEN 0
+            WHEN 'under_review' THEN 1
+            WHEN 'needs_revision' THEN 2
+            WHEN 'approved' THEN 3
+            WHEN 'completed' THEN 4
+            WHEN 'rejected' THEN 5
+            ELSE 6 END,
+            applications.updated_at DESC
+    """
+    with db_session() as conn:
+        return [dict(row) for row in conn.execute(sql, params).fetchall()]
+
+
+def admin_status_counts() -> dict[str, int]:
+    with db_session() as conn:
+        rows = conn.execute(
+            "SELECT status, COUNT(*) AS count FROM applications WHERE status != 'draft' GROUP BY status"
+        ).fetchall()
+    return {row["status"]: row["count"] for row in rows}
+
+
 def get_application(application_id: str) -> dict:
     with db_session() as conn:
         application = fetch_application(conn, application_id)

@@ -3,71 +3,99 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>市府工作台 ｜ 竹青安心GO</title>
+  <meta name="description" content="竹青安心GO 競賽 Demo 的承辦案件工作台。">
+  <title>案件工作台 ｜ 竹青安心GO</title>
+  <link rel="icon" href="/static/admin-mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin.css">
 </head>
-<body>
-  <div class="demo-banner">Demo 管理後台。看不到原始 Prompt、命中文字或瀏覽紀錄。預設密碼不可用於正式環境。</div>
-  <header class="site-header">
-    <div class="header-inner">
-      <strong>竹青安心GO 審查工作台</strong>
+<body class="admin-body">
+  <a class="skip-link" href="#main">跳到案件列表</a>
+  <div class="demo-banner">競賽 Demo，非新竹市政府正式系統。只顯示已送出的案件；LINE 對話草稿不列入。</div>
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <div>
+        <span class="admin-kicker">竹青安心GO · 市府端原型</span>
+        <strong>案件審查工作台</strong>
+      </div>
       <form method="post" action="/admin/logout">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <button class="btn-ghost" type="submit">登出</button>
       </form>
     </div>
   </header>
-  <main class="page">
-    <section class="grid grid-3">
-      <article class="card"><h2>案件總數</h2><p>{{ stats.total }}</p></article>
-      <article class="card"><h2>待開始審查</h2><p>{{ stats.submitted }}</p></article>
-      <article class="card"><h2>審查中</h2><p>{{ stats.under_review }}</p></article>
+
+  <main id="main" class="admin-shell">
+    <div class="admin-heading">
+      <div>
+        <p class="admin-eyebrow">案件管理</p>
+        <h1>案件工作清單</h1>
+        <p class="admin-description">查看已送出案件、追蹤審查狀態，並從個案頁處理下一步。</p>
+      </div>
+      <div class="admin-total"><span>已送出案件</span><strong>{{ total_cases }}</strong></div>
+    </div>
+
+    <section class="admin-queue" aria-label="案件狀態摘要">
+      <a href="/admin?status=submitted" class="admin-queue-item"><span>待開始審查</span><strong>{{ counts.get('submitted', 0) }}</strong></a>
+      <a href="/admin?status=under_review" class="admin-queue-item"><span>審查中</span><strong>{{ counts.get('under_review', 0) }}</strong></a>
+      <a href="/admin?status=needs_revision" class="admin-queue-item"><span>待申請人補件</span><strong>{{ counts.get('needs_revision', 0) }}</strong></a>
+      <a href="/admin?status=approved" class="admin-queue-item"><span>已核准待結案</span><strong>{{ counts.get('approved', 0) }}</strong></a>
     </section>
-    <section class="panel" style="margin-top:16px">
-      <h2>匿名風險彙總</h2>
-      <p class="hint">僅類別與處理結果，沒有原文。</p>
-      <ul>
-        {% for row in risk_rows %}
-        <li>{{ category_labels.get(row.category, row.category) }}／{{ action_labels.get(row.action, row.action) }}：{{ row.count }}</li>
-        {% else %}
-        <li>尚無彙總事件。</li>
-        {% endfor %}
-      </ul>
-    </section>
-    <section class="panel" style="margin-top:16px">
-      <h2>案件列表</h2>
-      <form method="get" action="/admin">
-        <label>狀態篩選
+
+    <section class="admin-list" aria-labelledby="cases-title">
+      <div class="admin-section-heading">
+        <p class="admin-eyebrow">所有已送出案件</p>
+        <h2 id="cases-title">案件列表 <span class="admin-result-count">{{ rows|length }} 筆</span></h2>
+      </div>
+      <form class="admin-filters" method="get" action="/admin" role="search">
+        <label>搜尋案件編號、工具或申請人
+          <input type="search" name="q" value="{{ search_query }}" maxlength="80" placeholder="輸入案件編號、工具或姓名">
+        </label>
+        <label>案件狀態
           <select name="status">
-            <option value="">全部</option>
-            {% for key, label in status_labels.items() %}
-            <option value="{{ key }}" {% if filter_status == key %}selected{% endif %}>{{ label }}</option>
+            <option value="">全部已送出案件</option>
+            {% for key in case_statuses %}
+            <option value="{{ key }}" {% if filter_status == key %}selected{% endif %}>{{ status_labels[key] }}</option>
             {% endfor %}
           </select>
         </label>
-        <button class="btn-secondary" type="submit">篩選</button>
+        <button type="submit">查詢</button>
+        {% if search_query or filter_status %}<a class="admin-clear" href="/admin">清除條件</a>{% endif %}
       </form>
       <div class="table-wrap">
-        <table>
+        <table class="admin-table">
           <thead>
-            <tr><th>編號</th><th>狀態</th><th>工具</th><th>更新時間</th><th></th></tr>
+            <tr>
+              <th scope="col">案件編號</th><th scope="col">申請人</th><th scope="col">數位工具</th>
+              <th scope="col">狀態</th><th scope="col">最後更新（UTC）</th>
+              <th scope="col">操作</th>
+            </tr>
           </thead>
           <tbody>
             {% for row in rows %}
             <tr>
-              <td><code>{{ row.id }}</code></td>
-              <td>{{ status_labels[row.status] }}</td>
+              <td><a class="admin-case-link" href="/admin/applications/{{ row.id }}">{{ row.id }}</a></td>
+              <td>{{ row.display_name }}</td>
               <td>{{ row.tool_name }}</td>
-              <td>{{ row.updated_at }}</td>
-              <td><a href="/admin/applications/{{ row.id }}">查看</a></td>
+              <td><span class="admin-status admin-status-{{ row.status }}">{{ status_labels.get(row.status, row.status) }}</span></td>
+              <td class="admin-date">{{ row.updated_at }}</td>
+              <td><a href="/admin/applications/{{ row.id }}" aria-label="查看案件 {{ row.id }}">查看案件</a></td>
             </tr>
             {% else %}
-            <tr><td colspan="5">沒有案件。</td></tr>
+            <tr><td class="admin-empty" colspan="6">
+              <strong>目前沒有符合條件的已送出案件。</strong>
+              <span>{% if search_query or filter_status %}請調整搜尋或狀態篩選。{% else %}LINE 草稿要等使用者確認送出後，才會成為後台案件。{% endif %}</span>
+            </td></tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </section>
+
+    <aside class="admin-scope-note">
+      <strong>目前資料範圍</strong>
+      <p>此清單讀取現有 <code>applications</code>；不含未送出的 LINE <code>line_sessions</code>。目前案件仍來自舊網站 MVP／合成 Demo，LINE 正式送出與市府系統串接尚未啟用。</p>
+    </aside>
   </main>
 </body>
 </html>

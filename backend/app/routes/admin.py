@@ -7,8 +7,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from app.config import BACKEND_DIR, settings
-from app.db import db_session
-from app.models import ACTION_LABELS, CATEGORY_LABELS, STATUS_LABELS
+from app.models import ADMIN_TRANSITIONS, STATUS_LABELS
 from app.security import (
     ADMIN_SESSION_KEY,
     admin_or_redirect,
@@ -28,8 +27,16 @@ def admin_context(request: Request, **extra):
         "csrf_token": ensure_csrf_token(request),
         "admin_username": settings.admin_username,
         "status_labels": STATUS_LABELS,
-        "category_labels": CATEGORY_LABELS,
-        "action_labels": ACTION_LABELS,
+        "identity_labels": {
+            "general": "一般青年",
+            "special": "特定對象",
+            "culture": "文化與語言保存類",
+        },
+        "tool_category_labels": {
+            "conversational_llm": "對話型 AI",
+            "image_video": "圖像與影音",
+            "productivity": "生產力工具",
+        },
     }
     ctx.update(extra)
     return ctx
@@ -69,33 +76,25 @@ def logout(request: Request, csrf_token: str = Form(...)):
 
 
 @router.get("/admin")
-def dashboard(request: Request, status: Optional[str] = None):
+def dashboard(request: Request, status: Optional[str] = None, q: str = ""):
     redirect = admin_or_redirect(request)
     if redirect:
         return redirect
-    rows = application_service.list_applications(status or None)
-    with db_session() as conn:
-        stats = {
-            "total": conn.execute("SELECT COUNT(*) AS c FROM applications").fetchone()["c"],
-            "submitted": conn.execute("SELECT COUNT(*) AS c FROM applications WHERE status = 'submitted'").fetchone()["c"],
-            "under_review": conn.execute("SELECT COUNT(*) AS c FROM applications WHERE status = 'under_review'").fetchone()["c"],
-        }
-        risk_rows = conn.execute(
-            """
-            SELECT category, action, COUNT(*) AS count
-            FROM risk_events
-            GROUP BY category, action
-            ORDER BY count DESC
-            """
-        ).fetchall()
+    case_statuses = tuple(key for key in STATUS_LABELS if key != "draft")
+    filter_status = status if status in case_statuses else ""
+    search_query = q.strip()[:80]
+    rows = application_service.list_admin_applications(filter_status or None, search_query)
+    counts = application_service.admin_status_counts()
     return templates.TemplateResponse(
         "admin/dashboard.html",
         admin_context(
             request,
             rows=rows,
-            filter_status=status or "",
-            stats=stats,
-            risk_rows=[dict(row) for row in risk_rows],
+            filter_status=filter_status,
+            search_query=search_query,
+            case_statuses=case_statuses,
+            counts=counts,
+            total_cases=sum(counts.values()),
         ),
     )
 
@@ -108,7 +107,11 @@ def case_page(request: Request, application_id: str):
     application = application_service.get_application(application_id)
     return templates.TemplateResponse(
         "admin/case.html",
-        admin_context(request, application=application),
+        admin_context(
+            request,
+            application=application,
+            allowed_transitions=ADMIN_TRANSITIONS.get(application["status"], set()),
+        ),
     )
 
 

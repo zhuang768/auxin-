@@ -3,60 +3,117 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="竹青安心GO 競賽 Demo 的案件審查詳情。">
   <title>案件 {{ application.id }} ｜ 市府工作台</title>
+  <link rel="icon" href="/static/admin-mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/admin.css">
 </head>
-<body>
-  <div class="demo-banner">Demo 個案頁。不顯示原始 Prompt、命中文字、完整 URL 或瀏覽紀錄。</div>
-  <main class="page">
-    <p><a href="/admin">返回列表</a></p>
-    <section class="hero">
-      <h1>{{ application.id }}</h1>
-      <p>申請人：{{ application.user.display_name }}（Demo）</p>
-      <p>Email：{{ application.user.email }} ｜ 手機：{{ application.user.phone }} <span class="badge-amber badge">合成資料</span></p>
-      <p>狀態：{{ application.status_label }}</p>
-    </section>
-    <section class="grid grid-3">
-      <article class="card">
-        <h2>必要欄位</h2>
-        <p>工具：{{ application.tool_name }}</p>
-        <p>目的：{{ application.purpose }}</p>
-      </article>
-      <article class="card">
-        <h2>安全學習</h2>
-        {% for item in application.learning_progress %}
-        <p>{{ item.label }}：{% if item.done %}已完成{% else %}未完成{% endif %}</p>
-        {% endfor %}
-      </article>
-      <article class="card">
-        <h2>更新狀態</h2>
-        <form method="post" action="/admin/applications/{{ application.id }}/review">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-          <label>新狀態
-            <select name="to_status" required>
-              <option value="under_review">開始審查</option>
-              <option value="needs_revision">請補件</option>
-              <option value="approved">核准</option>
-              <option value="rejected">退回</option>
-              <option value="completed">結案完成</option>
-            </select>
-          </label>
-          <label>結構化補件原因（僅補件時使用）
-            <select name="revision_reason">
-              <option value="">（無）</option>
-              <option value="請補充工具名稱與使用目的，回到安全入口查看。">補充工具與目的</option>
-              <option value="請完成安全教材後再送出，詳細說明請回安全入口查看。">未完成安全教材</option>
-              <option value="請確認 Demo 聯絡欄位為合成資料，詳細說明請回安全入口查看。">聯絡欄位需確認</option>
-            </select>
-          </label>
-          <label>內部備註（低敏感、不會放入 LINE 原文）
-            <textarea name="note" rows="2" maxlength="400"></textarea>
-          </label>
-          <button type="submit">儲存並發送通知</button>
-        </form>
-        <p class="hint">非法跳階會被後端拒絕。每次成功轉換會產生站內通知與 LINE dry-run。</p>
-      </article>
-    </section>
+<body class="admin-body">
+  <a class="skip-link" href="#main">跳到案件內容</a>
+  <div class="demo-banner">競賽 Demo，非政府正式審核或撥款紀錄。</div>
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <div><span class="admin-kicker">竹青安心GO · 市府端原型</span><strong>案件審查工作台</strong></div>
+      <a class="admin-header-link" href="/admin">返回案件列表</a>
+    </div>
+  </header>
+  <main id="main" class="admin-shell">
+    <nav aria-label="麵包屑" class="admin-breadcrumb"><a href="/admin">案件列表</a><span>/</span><span>{{ application.id }}</span></nav>
+    <div class="admin-case-heading">
+      <div>
+        <p class="admin-eyebrow">案件詳情</p>
+        <h1>{{ application.id }}</h1>
+        <p>申請人：{{ application.user.display_name }} · 建立時間（UTC）：{{ application.created_at }}</p>
+      </div>
+      <span class="admin-status admin-status-{{ application.status }}">{{ application.status_label }}</span>
+    </div>
+
+    {% if application.status == 'draft' %}
+    <div class="admin-warning" role="status">這是舊網站建立、尚未送出的草稿，不列入案件總覽或正式審查。</div>
+    {% endif %}
+
+    <div class="admin-case-layout">
+      <div class="admin-case-main">
+        <section class="admin-detail-section" aria-labelledby="application-data-title">
+          <h2 id="application-data-title">申請資料</h2>
+          <dl class="admin-detail-grid">
+            <div><dt>申請身分</dt><dd>{{ identity_labels.get(application.identity_type, application.identity_type) }}</dd></div>
+            <div><dt>工具分類</dt><dd>{{ tool_category_labels.get(application.tool_category, application.tool_category) }}</dd></div>
+            <div><dt>數位工具</dt><dd>{{ application.tool_name }}</dd></div>
+            <div><dt>使用目的</dt><dd>{{ application.purpose }}</dd></div>
+            <div><dt>聯絡 Email</dt><dd>{{ application.user.email }}</dd></div>
+            <div><dt>聯絡電話</dt><dd>{{ application.user.phone }}</dd></div>
+          </dl>
+          <p class="admin-data-note">目前的舊 MVP 案件尚無購買金額、日期、訂閱方式、附件及六題 LINE 資安檢核欄位；不會在這裡補造數值。</p>
+        </section>
+
+        <section class="admin-detail-section" aria-labelledby="history-title">
+          <h2 id="history-title">狀態歷程</h2>
+          <ol class="admin-event-list">
+            {% for event in application.events %}
+            <li>
+              <div><strong>{{ status_labels.get(event.to_status, event.to_status) }}</strong><span>{{ event.created_at }} UTC</span></div>
+              <p>操作來源：{{ event.actor }}{% if event.note %} · {{ event.note }}{% endif %}</p>
+            </li>
+            {% else %}
+            <li>尚無狀態紀錄。</li>
+            {% endfor %}
+          </ol>
+        </section>
+      </div>
+
+      <aside class="admin-case-side">
+        <section class="admin-detail-section" aria-labelledby="review-title">
+          <h2 id="review-title">審查操作</h2>
+          {% if allowed_transitions %}
+          <p class="admin-description">只列出此狀態可執行的轉換；每次成功操作都會留下狀態紀錄。</p>
+          <form method="post" action="/admin/applications/{{ application.id }}/review">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <label>新狀態
+              <select name="to_status" required>
+                {% for key in status_labels if key in allowed_transitions %}
+                <option value="{{ key }}">{{ status_labels[key] }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label>補件原因（選擇「需補件」時使用）
+              <select name="revision_reason">
+                <option value="">（無）</option>
+                <option value="請補充工具名稱與使用目的，回到安全入口查看。">補充工具與目的</option>
+                <option value="請完成安全教材後再送出，詳細說明請回安全入口查看。">未完成安全教材</option>
+                <option value="請確認 Demo 聯絡欄位為合成資料，詳細說明請回安全入口查看。">聯絡欄位需確認</option>
+              </select>
+            </label>
+            <label>內部備註（不會作為 LINE 通知原文）
+              <textarea name="note" rows="3" maxlength="400"></textarea>
+            </label>
+            <button type="submit">儲存狀態</button>
+          </form>
+          <p class="admin-data-note">目前狀態通知是站內訊息與 LINE dry-run，不會傳給真實 LINE 帳號。</p>
+          {% else %}
+          <p class="admin-description">此案件目前沒有可執行的行政狀態轉換。</p>
+          {% endif %}
+        </section>
+
+        {% if application.revision_reason %}
+        <section class="admin-detail-section" aria-labelledby="revision-title">
+          <h2 id="revision-title">補件原因</h2>
+          <p>{{ application.revision_reason }}</p>
+        </section>
+        {% endif %}
+
+        <section class="admin-detail-section" aria-labelledby="learning-title">
+          <h2 id="learning-title">舊版安全教材紀錄</h2>
+          <ul class="admin-learning-list">
+            {% for item in application.learning_progress %}
+            <li><span>{{ item.label }}</span><strong>{% if item.done %}已完成{% else %}未完成{% endif %}</strong></li>
+            {% endfor %}
+          </ul>
+          <p class="admin-data-note">這不是 LINE Phase 5 六題資安檢核結果。</p>
+        </section>
+      </aside>
+    </div>
   </main>
 </body>
 </html>
