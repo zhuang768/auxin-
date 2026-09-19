@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}案件進度 ｜ 竹青安心GO{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="badge">Demo／合成資料</p>
+  <h1>案件 {{ application.id }}</h1>
+  <p>申請人 {{ application.user.display_name }} ｜ 目前狀態：<strong>{{ application.status_label }}</strong></p>
+  <p class="lede">下一步：{{ application.next_step }}</p>
+</section>
+<section class="panel">
+  <h2>時間軸</h2>
+  {% set order = ['draft','submitted','under_review','needs_revision','rejected','approved','completed'] %}
+  <ol class="timeline">
+    {% for item in application.events %}
+    <li class="{% if loop.last %}current{% endif %}">
+      {{ item.created_at }}：{{ status_labels.get(item.from_status, '開始') }} → {{ status_labels[item.to_status] }}
+      {% if item.note %}<div class="hint">{{ item.note }}</div>{% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+<section class="grid grid-3" style="margin-top:16px">
+  <article class="card">
+    <h2>申請摘要</h2>
+    <p>工具：{{ application.tool_name }}</p>
+    <p>目的：{{ application.purpose }}</p>
+    <p class="hint">此頁不顯示身分證、信用卡或原始 Prompt。</p>
+  </article>
+  <article class="card">
+    <h2>安全學習完成度</h2>
+    <div class="progress-list">
+      {% for item in application.learning_progress %}
+      <div class="progress-item">
+        <span>{{ item.label }}</span>
+        <span class="badge {% if item.done %}badge-ok{% else %}badge-amber{% endif %}">{% if item.done %}已完成{% else %}未完成{% endif %}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="hint">只表示完成課程與操作，不代表已完全安全。</p>
+  </article>
+  <article class="card">
+    <h2>補件與操作</h2>
+    {% if application.status == 'needs_revision' %}
+      <div class="callout-warn callout">{{ application.revision_reason or '請補充資料後再次送出。' }}</div>
+      <form method="post" action="/applications/{{ application.id }}/resubmit">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit">補件後再次送出</button>
+      </form>
+    {% else %}
+      <p class="hint">前端不能任意跳階。核准、補件與退回只能由已登入的管理員執行。</p>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

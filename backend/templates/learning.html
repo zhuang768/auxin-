@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}使用生成式 AI 前的安全檢查 ｜ 竹青安心GO{% endblock %}
+{% block content %}
+<section class="hero no-print">
+  <p class="badge">教材 Demo</p>
+  <h1>使用生成式 AI 前的安全檢查</h1>
+  <p class="lede">一頁懶人包，適合螢幕閱讀與列印。完成下列任務只代表你走過安全流程，不代表永遠不會洩漏資料。</p>
+  <div class="actions">
+    <button class="btn-secondary" type="button" id="print-guide">列印／轉 PDF</button>
+    <a class="btn-ghost" href="/attestation">申請 Demo 完成憑證</a>
+  </div>
+</section>
+<section class="panel" id="guide">
+  <h2>五步檢查</h2>
+  <ol>
+    {% for step in guide_steps %}
+    <li>
+      <strong>{{ step.title }}</strong>
+      <p>{{ step.body }}</p>
+    </li>
+    {% endfor %}
+  </ol>
+  <p class="callout">原始內容只在你的裝置上檢查，不會傳到竹青安心GO伺服器。</p>
+</section>
+<section class="panel" style="margin-top:16px">
+  <h2>重大案例摘要</h2>
+  <p class="hint">只收錄已核實來源。完整引用見 <a href="/privacy">隱私說明</a> 與文件 <code>docs/案例來源.md</code>。</p>
+  <div class="grid">
+    {% for case in cases %}
+    <article class="card">
+      <p class="badge">{{ case.date }}</p>
+      <h3>{{ case.title }}</h3>
+      <p><strong>事件：</strong>{{ case.event }}</p>
+      <p><strong>風險：</strong>{{ case.risk }}</p>
+      <p><strong>你可以做什麼：</strong>{{ case.user_action }}</p>
+      <p>來源：<a href="{{ case.source_url }}" rel="noopener noreferrer">{{ case.source_name }}</a></p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+<section class="panel no-print" style="margin-top:16px">
+  <h2>三題情境測驗</h2>
+  <p>每題選完立即解釋。這不是證照考試。</p>
+  <div id="quiz-root" data-endpoint="/api/learning/completions"></div>
+</section>
+<section class="panel no-print" style="margin-top:16px">
+  <h2>安全設定與學習完成度</h2>
+  <div class="progress-list">
+    {% for item in progress['items'] %}
+    <div class="progress-item">
+      <span>{{ item.label }}</span>
+      <span>{% if item.done %}已完成{% else %}未完成{% endif %}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <p class="hint">{{ progress.disclaimer }}</p>
+</section>
+<script type="application/json" id="quiz-data">{{ quiz | tojson }}</script>
+{% endblock %}
+{% block scripts %}
+<script src="/static/learning.js"></script>
+{% endblock %}

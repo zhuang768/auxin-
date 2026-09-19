@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}竹青安心GO ｜ 服務首頁{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="badge">Demo／合成資料</p>
+  <h1>在資料離開裝置前，先看清楚風險。</h1>
+  <p class="lede">青年準備把內容送進 ChatGPT、Claude、Gemini 時，竹青安心GO 於本機辨識可能的個資與機密資訊，解釋風險並提供安全改寫；市府只看到申請狀態與匿名彙總，看不到原始 Prompt。</p>
+  <div class="actions">
+    <a class="btn" href="/demo-chat">開啟 Demo Chat</a>
+    <a class="btn-secondary" href="/apply">建立 Demo 申請</a>
+    <a class="btn-ghost" href="/learning">閱讀安全檢查懶人包</a>
+  </div>
+</section>
+<section class="grid grid-3">
+  <article class="card">
+    <h2>本機防護</h2>
+    <p>送出前攔截身分證、信用卡、手機、Email 與地址特徵。規則在瀏覽器執行，原文不上傳。</p>
+  </article>
+  <article class="card">
+    <h2>補助入口</h2>
+    <p>資格預檢、合成資料申請、時間軸與站內通知。正式申辦仍須走市政府既有程序。</p>
+  </article>
+  <article class="card">
+    <h2>市府工作台</h2>
+    <p>需 Demo 管理員登入。可核准、補件或退回，並派送低敏感度通知。看不到對話原文。</p>
+  </article>
+</section>
+<section class="panel" style="margin-top:16px">
+  <h2>目前 Demo 使用者</h2>
+  <p>{{ user.display_name }}（{{ user.email }}）｜手機 {{ user.phone }} <span class="badge-amber badge">合成資料</span></p>
+  {% if latest_application %}
+  <p>最新案件 {{ latest_application.id }}：{{ latest_application.status_label }}。下一步：{{ latest_application.next_step }}</p>
+  {% else %}
+  <p>尚無申請。可從 Demo 申請開始。</p>
+  {% endif %}
+  <p class="hint">{{ progress.disclaimer }} 目前完成 {{ progress.completed_count }}／{{ progress.total }} 項安全學習任務。</p>
+</section>
+{% endblock %}

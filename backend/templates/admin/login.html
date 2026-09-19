@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>市府工作台登入 ｜ 竹青安心GO</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="demo-banner" role="status">這是競賽 Demo 管理員登入，預設密碼不可用於正式環境。</div>
+  <main class="page">
+    <section class="hero">
+      <h1>市府審查工作台</h1>
+      <p>不可公開無保護操作。請使用環境變數提供的 Demo 管理員帳密。</p>
+    </section>
+    <form class="panel" method="post" action="/admin/login" style="max-width:420px">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>帳號
+        <input name="username" value="{{ admin_username }}" required autocomplete="username">
+      </label>
+      <label>密碼
+        <input type="password" name="password" required autocomplete="current-password">
+      </label>
+      {% if error %}<p class="error">{{ error }}</p>{% endif %}
+      <p class="hint">預設帳號見 <code>.env.example</code>。這不是市政府正式帳號。</p>
+      <button type="submit">登入</button>
+    </form>
+  </main>
+</body>
+</html>

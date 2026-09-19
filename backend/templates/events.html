@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}風險事件 ｜ 竹青安心GO{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="badge">隱私檢查頁</p>
+  <h1>匿名風險事件</h1>
+  <p class="lede">這裡只看得到類別與處理結果。若出現原始 Prompt 或命中文字，即代表系統不合格。</p>
+</section>
+<section class="panel">
+  <h2>資料庫欄位</h2>
+  <p>{% for col in columns %}<code>{{ col }}</code> {% endfor %}</p>
+  <p class="hint">允許欄位：category、action、occurred_at、client_version、demo_session_id。沒有 raw_prompt。</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>時間</th><th>類別</th><th>處理</th><th>client_version</th><th>demo_session_id</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in events %}
+        <tr>
+          <td>{{ event.occurred_at }}</td>
+          <td>{{ event.category }}</td>
+          <td>{{ event.action }}</td>
+          <td>{{ event.client_version }}</td>
+          <td>{{ event.demo_session_id }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">尚無事件。完成一次攔截後會出現彙總紀錄。</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

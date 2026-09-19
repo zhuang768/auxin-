@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Demo Chat ｜ 竹青安心GO{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="badge">可靠展示入口</p>
+  <h1>Demo Chat</h1>
+  <p class="lede">這不是真實 AI。請先載入 Chrome 擴充功能，再貼上合成測試資料。攔截、解釋與遮蔽都在本機完成。</p>
+</section>
+<section class="panel chat-shell">
+  <p class="callout">請使用合成資料。不要貼真實身分證、信用卡、地址、電話或私人對話。</p>
+  <div class="actions">
+    <button type="button" class="btn-secondary" id="fill-demo-text">填入合成測試資料</button>
+    <button type="button" class="btn-ghost" id="clear-chat">清除畫面</button>
+  </div>
+  <label for="demo-chat-input">要送出的內容
+    <textarea id="demo-chat-input" name="message" rows="7" maxlength="4000" placeholder="在此輸入。若擴充功能已啟用，送出前會先檢查可能的個資。"></textarea>
+  </label>
+  <div class="actions">
+    <button type="button" id="demo-chat-send">送出</button>
+  </div>
+  <div id="demo-chat-messages" aria-live="polite"></div>
+  <p class="hint">若未載入擴充功能，此頁仍可送出文字，但不會攔截。現場 Demo 請先到 chrome://extensions 載入 <code>extension/</code>。</p>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/demo-chat.js"></script>
+{% endblock %}

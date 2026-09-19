@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}資格與文件預檢 ｜ 竹青安心GO{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="badge">Demo／非正式資格審核</p>
+  <h1>申請前先核對資格與文件</h1>
+  <p class="lede">此頁依公開補助方向整理常見條件，不能取代市政府正式公告。請以青年發展中心最新計畫為準。</p>
+</section>
+<div class="grid grid-3">
+  <article class="card">
+    <h2>可能符合的方向</h2>
+    <ul>
+      <li>設籍或實際居住新竹市之青年（以當年度公告為準）</li>
+      <li>購買指定數位／AI 工具並保留發票</li>
+      <li>完成安全使用學習與本機防護示範</li>
+    </ul>
+  </article>
+  <article class="card">
+    <h2>建議準備文件</h2>
+    <ul>
+      <li>身分與設籍證明（正式件不要上傳到本 Demo）</li>
+      <li>工具訂閱或購買發票</li>
+      <li>安全學習完成紀錄（本系統可簽發 Demo 憑證）</li>
+    </ul>
+  </article>
+  <article class="card">
+    <h2>本 Demo 不會做的事</h2>
+    <ul>
+      <li>不驗證真實身分</li>
+      <li>不核定或撥付款項</li>
+      <li>不接收身分證影像或原始 AI 對話</li>
+    </ul>
+  </article>
+</div>
+<p class="actions"><a class="btn" href="/apply">我了解，使用合成資料申請</a></p>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}隱私說明 ｜ 竹青安心GO{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="badge">Demo 隱私摘要</p>
+  <h1>我們蒐集什麼、不蒐集什麼</h1>
+</section>
+<section class="grid">
+  <article class="card">
+    <h2>會蒐集</h2>
+    <ul>
+      <li>Demo 申請必要欄位：姓名、示意 Email、示意手機、工具與目的</li>
+      <li>案件狀態與低敏感度通知</li>
+      <li>教材完成紀錄</li>
+      <li>風險事件白名單：category、action、occurred_at、client_version、demo_session_id</li>
+    </ul>
+  </article>
+  <article class="card">
+    <h2>不會蒐集</h2>
+    <ul>
+      <li>原始 Prompt、命中文字、剪貼簿、鍵擊</li>
+      <li>完整 URL、瀏覽紀錄、真實身分證或信用卡</li>
+      <li>活躍時數、Prompt 次數、連續天數等監控指標</li>
+    </ul>
+  </article>
+</section>
+<p class="callout" style="margin-top:16px">原始內容只在你的裝置上檢查，不會傳到竹青安心GO伺服器。</p>
+<p>完整說明見專案文件 <code>docs/PRIVACY.md</code>。這是競賽 Demo，所有資料皆為合成資料。</p>
+{% endblock %}

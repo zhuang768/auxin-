@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}通知 ｜ 竹青安心GO{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="badge">Demo／合成資料</p>
+  <h1>通知中心</h1>
+  <p class="lede">站內通知為預設且完整可用。LINE 僅顯示準備送出的低敏感度訊息與 dry-run 結果。</p>
+</section>
+{% if line_preview %}
+<section class="callout-warn callout">
+  <h2>LINE dry-run 預覽</h2>
+  <p>LINE 為 PoC 通知介面，尚未連接新竹市政府正式帳號。</p>
+  <pre>{{ line_preview.preview }}</pre>
+</section>
+{% endif %}
+<section class="panel" style="margin-top:16px">
+  <h2>站內通知</h2>
+  {% if notifications %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>時間</th><th>通路</th><th>標題</th><th>內容</th><th>結果</th></tr>
+      </thead>
+      <tbody>
+        {% for item in notifications %}
+        <tr>
+          <td>{{ item.created_at }}</td>
+          <td>{{ item.channel }}</td>
+          <td>{{ item.title }}</td>
+          <td>{{ item.body }}</td>
+          <td>{{ item.delivery_status }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p>目前沒有通知。管理員更新案件狀態後會出現在這裡。</p>
+  {% endif %}
+</section>
+{% endblock %}

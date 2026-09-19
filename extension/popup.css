@@ -1,0 +1,11 @@
+body {
+  font-family: "PingFang TC", "Noto Sans TC", sans-serif;
+  width: 280px;
+  margin: 0;
+  padding: 16px;
+  color: #1c2a2f;
+  background: #fffdf8;
+}
+h1 { font-size: 18px; margin: 0 0 8px; color: #0f4c5c; }
+.badge { background: #f7ead4; color: #5c3b0b; display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+.hint { color: #5d6a70; font-size: 13px; }

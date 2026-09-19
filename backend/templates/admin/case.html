@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>案件 {{ application.id }} ｜ 市府工作台</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="demo-banner">Demo 個案頁。不顯示原始 Prompt、命中文字、完整 URL 或瀏覽紀錄。</div>
+  <main class="page">
+    <p><a href="/admin">返回列表</a></p>
+    <section class="hero">
+      <h1>{{ application.id }}</h1>
+      <p>申請人：{{ application.user.display_name }}（Demo）</p>
+      <p>Email：{{ application.user.email }} ｜ 手機：{{ application.user.phone }} <span class="badge-amber badge">合成資料</span></p>
+      <p>狀態：{{ application.status_label }}</p>
+    </section>
+    <section class="grid grid-3">
+      <article class="card">
+        <h2>必要欄位</h2>
+        <p>工具：{{ application.tool_name }}</p>
+        <p>目的：{{ application.purpose }}</p>
+      </article>
+      <article class="card">
+        <h2>安全學習</h2>
+        {% for item in application.learning_progress %}
+        <p>{{ item.label }}：{% if item.done %}已完成{% else %}未完成{% endif %}</p>
+        {% endfor %}
+      </article>
+      <article class="card">
+        <h2>更新狀態</h2>
+        <form method="post" action="/admin/applications/{{ application.id }}/review">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <label>新狀態
+            <select name="to_status" required>
+              <option value="under_review">開始審查</option>
+              <option value="needs_revision">請補件</option>
+              <option value="approved">核准</option>
+              <option value="rejected">退回</option>
+              <option value="completed">結案完成</option>
+            </select>
+          </label>
+          <label>結構化補件原因（僅補件時使用）
+            <select name="revision_reason">
+              <option value="">（無）</option>
+              <option value="請補充工具名稱與使用目的，回到安全入口查看。">補充工具與目的</option>
+              <option value="請完成安全教材後再送出，詳細說明請回安全入口查看。">未完成安全教材</option>
+              <option value="請確認 Demo 聯絡欄位為合成資料，詳細說明請回安全入口查看。">聯絡欄位需確認</option>
+            </select>
+          </label>
+          <label>內部備註（低敏感、不會放入 LINE 原文）
+            <textarea name="note" rows="2" maxlength="400"></textarea>
+          </label>
+          <button type="submit">儲存並發送通知</button>
+        </form>
+        <p class="hint">非法跳階會被後端拒絕。每次成功轉換會產生站內通知與 LINE dry-run。</p>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

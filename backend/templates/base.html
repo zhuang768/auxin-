@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}竹青安心GO{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要內容</a>
+  <div class="demo-banner" role="status">這是競賽 Demo，所有資料皆為合成資料。系統能降低風險，但無法保證偵測所有敏感資訊。</div>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="/">
+        <span class="brand-kicker">新竹市青年數位工具補助 Demo</span>
+        <span class="brand-name">竹青安心GO</span>
+      </a>
+      <div class="header-actions">
+        <form method="post" action="/demo/reset">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="btn-ghost" type="submit">一鍵重設 Demo 資料</button>
+        </form>
+        <a class="btn-secondary" href="/demo/readiness">Demo 就緒檢查</a>
+      </div>
+    </div>
+  </header>
+  <nav class="site-nav" aria-label="主要">
+    <div class="nav-inner">
+      <a href="/" {% if page == 'home' %}aria-current="page"{% endif %}>首頁</a>
+      <a href="/eligibility" {% if page == 'eligibility' %}aria-current="page"{% endif %}>資格預檢</a>
+      <a href="/apply" {% if page == 'apply' %}aria-current="page"{% endif %}>Demo 申請</a>
+      <a href="{% if latest_application %}/applications/{{ latest_application.id }}{% else %}/apply{% endif %}" {% if page == 'status' %}aria-current="page"{% endif %}>案件進度</a>
+      <a href="/notifications" {% if page == 'notifications' %}aria-current="page"{% endif %}>通知{% if unread_count %}（{{ unread_count }}）{% endif %}</a>
+      <a href="/learning" {% if page == 'learning' %}aria-current="page"{% endif %}>安全教材</a>
+      <a href="/demo-chat" {% if page == 'demo-chat' %}aria-current="page"{% endif %}>Demo Chat</a>
+      <a href="/events" {% if page == 'events' %}aria-current="page"{% endif %}>事件頁</a>
+      <a href="/privacy" {% if page == 'privacy' %}aria-current="page"{% endif %}>隱私說明</a>
+      <a href="/admin/login">市府工作台</a>
+    </div>
+  </nav>
+  <main id="main" class="page">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>原始內容只在你的裝置上檢查，不會傳到竹青安心GO伺服器。</p>
+      <p>LINE 為 PoC 通知介面，尚未連接新竹市政府正式帳號。本系統不是正式申辦、撥款或身分驗證服務。</p>
+    </div>
+  </footer>
+  <script src="/static/app.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

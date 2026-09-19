@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+.env
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# App data
+backend/data/
+*.db
+*.db-journal
+app.db
+
+# Node / editor
+node_modules/
+.DS_Store
+.idea/
+.vscode/
+.playwright-cli/
+*.log
+
+# Secrets and local overrides
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Local planning and export artifacts (not application source)
+/竹青安心GO_完整企劃書.md
+/竹青安心GO_完整企劃書_v3.docx
+/竹青安心GO_完整企劃書_v3.pdf
+/重做專案_完整AI_Agent_Prompt.md

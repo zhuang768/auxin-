@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Demo 完成憑證 ｜ 竹青安心GO{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="badge">PoC 完整性憑證</p>
+  <h1>隱私保護完成憑證</h1>
+  <p class="lede">伺服器先發短期一次性 nonce，再以 HMAC 簽發紀錄。這不是政府身分驗證，也不能保證使用者永遠遵守安全行為。</p>
+</section>
+<section class="panel">
+  <p>目前完成 {{ progress.completed_count }}／{{ progress.total }} 項任務。</p>
+  <form method="post" action="/attestation/complete">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit">向伺服器申請 Demo 憑證</button>
+  </form>
+  {% if result %}
+  <h2>簽發結果</h2>
+  <p>憑證編號：<code>{{ result.id }}</code></p>
+  <p>MAC：<code>{{ result.mac }}</code></p>
+  <pre>{{ result.payload | tojson(indent=2) }}</pre>
+  <p class="hint">{{ result.payload.disclaimer }}</p>
+  {% endif %}
+</section>
+{% endblock %}

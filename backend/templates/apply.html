@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Demo 申請 ｜ 竹青安心GO{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="badge">Demo／合成資料</p>
+  <h1>建立一筆示範申請</h1>
+  <p class="lede">請只使用畫面上的合成資料。送出後狀態為「已送出」，後續只能由市府工作台依合法狀態機推進。</p>
+</section>
+<form class="panel form-grid" method="post" action="/apply" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label>姓名
+    <input name="display_name" value="林小竹" required maxlength="40" autocomplete="name">
+  </label>
+  <label>電子郵件
+    <input type="email" name="email" value="demo@example.test" required maxlength="120" autocomplete="email">
+    <span class="hint">合成資料，請勿改成真實信箱。</span>
+  </label>
+  <label>手機（合成格式）
+    <input name="phone" value="0912-000-111" required maxlength="20" autocomplete="tel">
+    <span class="hint">此號碼為示意用合成資料，非正式門號。</span>
+  </label>
+  <label>身分別
+    <select name="identity_type" required>
+      <option value="general">一般青年（Demo）</option>
+      <option value="disadvantaged">低收／中低收入戶（Demo）</option>
+    </select>
+  </label>
+  <label>工具類別
+    <select name="tool_category" required>
+      <option value="conversational_llm">深度對話型 LLM</option>
+      <option value="image_video">影像影音創作工具</option>
+      <option value="productivity">數位生產力工具</option>
+    </select>
+  </label>
+  <label>工具名稱
+    <input name="tool_name" value="ChatGPT Plus（Demo）" required maxlength="80">
+  </label>
+  <label>使用目的
+    <textarea name="purpose" rows="3" required maxlength="400">練習使用生成式 AI 撰寫企劃摘要，僅使用合成資料。</textarea>
+  </label>
+  <fieldset>
+    <legend>通知偏好</legend>
+    <label class="checkbox"><input type="checkbox" name="notify_in_app" checked> 站內通知（完整可用）</label>
+    <label class="checkbox"><input type="checkbox" name="notify_line" checked> LINE（PoC 模擬，未連接市政府正式帳號）</label>
+    <label class="checkbox"><input type="checkbox" name="notify_email"> Email（PoC／未啟用）</label>
+    <label class="checkbox"><input type="checkbox" name="notify_sms"> 簡訊（PoC／未啟用）</label>
+  </fieldset>
+  <div class="actions">
+    <button type="submit">送出 Demo 申請</button>
+    <a class="btn-ghost" href="/eligibility">返回預檢</a>
+  </div>
+</form>
+{% endblock %}
