@@ -40,6 +40,12 @@ def test_workbench_prioritizes_cases_and_excludes_drafts(client):
     add_case("app_unsubmitted", "draft", "尚未送出工具")
     timestamp = now_iso()
     with db_session() as conn:
+        # The focused admin branch does not require the later LINE schema.
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS line_sessions ("
+            "user_hash TEXT PRIMARY KEY, state TEXT NOT NULL, "
+            "created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"
+        )
         conn.execute(
             "INSERT INTO line_sessions (user_hash, state, created_at, updated_at) VALUES (?, ?, ?, ?)",
             ("synthetic-line-draft-hash", "tool_name", timestamp, timestamp),
